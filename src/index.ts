@@ -1,6 +1,7 @@
 // import vertSource from 'raw-loader!glslify-loader!./res/myShader.vert';
 import { resize } from './CanvasHelpers';
-import { createProgram, createShader } from './ShaderHelpers';
+import { randomInt } from './MathHelpers';
+import { createProgram, createShader, setRectangle } from './ShaderHelpers';
 // import temp from '../res/myShader.vert';
 // import txt from 'raw-loader!../res/myShader.vert';
 
@@ -37,10 +38,18 @@ function main() {
         'a_position'
     );
 
+    const resolutionUniformLocation = gl.getUniformLocation(
+        program,
+        'u_resolution'
+    );
+
+    const colorLocation = gl.getUniformLocation(program, 'u_color');
+
     const positionBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
 
-    const positions = [0, 0, 0, 0.5, 0.7, 0];
+    // Positions in pixels
+    const positions = [10, 20, 80, 20, 10, 30, 10, 30, 80, 20, 80, 30];
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
 
     // vertex array object
@@ -75,11 +84,42 @@ function main() {
     // Bind the attribute/buffer set we want.
     gl.bindVertexArray(vao);
 
-    // Ask WebGL to execute our GLSL program
-    const primitiveType = gl.TRIANGLES;
-    const first = 0;
-    const count = 3; // execute our shader 3 times
-    gl.drawArrays(primitiveType, first, count);
+    // Pass in the canvas resolution so we can convert from
+    // pixels to clip space in the shader
+    gl.uniform2f(resolutionUniformLocation, gl.canvas.width, gl.canvas.height);
+
+    // // Ask WebGL to execute our GLSL program
+    // const primitiveType = gl.TRIANGLES;
+    // const first = 0;
+    // const count = positions.length / size; // execute our shader 3 times
+    // gl.drawArrays(primitiveType, first, count);
+
+    // draw 50 random rectangles in random colors
+    for (let ii = 0; ii < 50; ++ii) {
+        // Put a rectangle in the position buffer
+        setRectangle(
+            gl,
+            randomInt(300),
+            randomInt(300),
+            randomInt(300),
+            randomInt(300)
+        );
+
+        // Set a random color.
+        gl.uniform4f(
+            colorLocation,
+            Math.random(),
+            Math.random(),
+            Math.random(),
+            1
+        );
+
+        // Draw the rectangle.
+        const primitiveType = gl.TRIANGLES;
+        const first = 0;
+        const count = 6;
+        gl.drawArrays(primitiveType, first, count);
+    }
 }
 
 main();
