@@ -1,5 +1,5 @@
 // import vertSource from 'raw-loader!glslify-loader!./res/myShader.vert';
-import { createShader } from './ShaderHelpers';
+import { createShader, createProgram } from './ShaderHelpers';
 
 // import temp from '../res/myShader.vert';
 // import txt from 'raw-loader!../res/myShader.vert';
@@ -27,6 +27,10 @@ function main() {
 
     console.log(vertexShader);
     console.log(fragmentShader);
+
+    const program = createProgram(gl, vertexShader, fragmentShader);
+
+    console.log(program);
 }
 
 main();
