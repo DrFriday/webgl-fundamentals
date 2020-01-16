@@ -13,7 +13,7 @@ export function createShader(
         return shader;
     }
 
-    console.log(gl.getShaderInfoLog(shader));
+    console.log(gl.getShaderInfoLog(shader)); // tslint:disable-line
     gl.deleteShader(shader);
 
     return undefined;
@@ -35,7 +35,7 @@ export function createProgram(
         return program;
     }
 
-    console.log(gl.getProgramInfoLog(program));
+    console.log(gl.getProgramInfoLog(program)); // tslint:disable-line
     gl.deleteProgram(program);
 
     return undefined;
@@ -43,10 +43,10 @@ export function createProgram(
 
 // Fills the buffer with the values that define a rectangle.
 export function setRectangle(gl, x, y, width, height) {
-    var x1 = x;
-    var x2 = x + width;
-    var y1 = y;
-    var y2 = y + height;
+    const x1 = x;
+    const x2 = x + width;
+    const y1 = y;
+    const y2 = y + height;
 
     // NOTE: gl.bufferData(gl.ARRAY_BUFFER, ...) will affect
     // whatever buffer is bound to the `ARRAY_BUFFER` bind point

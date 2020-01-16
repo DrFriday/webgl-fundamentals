@@ -11,9 +11,9 @@ function main() {
     const gl = canvas.getContext('webgl2');
 
     if (!gl) {
-        console.error('No WebGL2 ☹');
+        console.error('No WebGL2 ☹'); // tslint:disable-line
     } else {
-        console.log(`Has WebGL2 version ${gl.VERSION}`);
+        console.log(`Has WebGL2 version ${gl.VERSION}`); // tslint:disable-line
     }
 
     const vertSource = (require('!!raw-loader!glslify-loader!../res/myShader.vert') as any)
@@ -21,17 +21,10 @@ function main() {
     const fragSource = (require('!!raw-loader!glslify-loader!../res/myShader.frag') as any)
         .default;
 
-    // console.log({ vertSource, fragSource });
-
     const vertexShader = createShader(gl, gl.VERTEX_SHADER, vertSource);
     const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragSource);
 
-    console.log(vertexShader);
-    console.log(fragmentShader);
-
     const program = createProgram(gl, vertexShader, fragmentShader);
-
-    console.log(program);
 
     const positionAttributeLocation = gl.getAttribLocation(
         program,
