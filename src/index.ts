@@ -1,9 +1,6 @@
-// import vertSource from 'raw-loader!glslify-loader!./res/myShader.vert';
 import { resize } from './CanvasHelpers';
 import { randomInt } from './MathHelpers';
 import { createProgram, createShader, setRectangle } from './ShaderHelpers';
-// import temp from '../res/myShader.vert';
-// import txt from 'raw-loader!../res/myShader.vert';
 
 function main() {
     const canvas = document.querySelector('#webgl-canvas') as HTMLCanvasElement;
@@ -81,11 +78,11 @@ function main() {
     // pixels to clip space in the shader
     gl.uniform2f(resolutionUniformLocation, gl.canvas.width, gl.canvas.height);
 
-    // // Ask WebGL to execute our GLSL program
-    // const primitiveType = gl.TRIANGLES;
-    // const first = 0;
-    // const count = positions.length / size; // execute our shader 3 times
-    // gl.drawArrays(primitiveType, first, count);
+    // Ask WebGL to execute our GLSL program
+    const primitiveType = gl.TRIANGLES;
+    const first = 0;
+    const count = positions.length / size; // execute our shader 3 times
+    gl.drawArrays(primitiveType, first, count);
 
     // draw 50 random rectangles in random colors
     for (let ii = 0; ii < 50; ++ii) {
