@@ -1,0 +1,33 @@
+{
+    "name": "webgl-fundamentals",
+    "version": "1.0.0",
+    "description": "WebGL Fundamentals",
+    "main": "index.js",
+    "author": "Matt Bishop",
+    "license": "MIT",
+    "private": true,
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "start": "webpack-dev-server --mode development --progress --color",
+        "watch": "webpack --watch --mode development",
+        "build": "webpack --mode production",
+        "build:watch": "webpack --mode production --watch"
+    },
+    "devDependencies": {
+        "lint-staged": "^9.5.0",
+        "mrm": "^2.0.0",
+        "prettier": "^1.19.1",
+        "ts-loader": "^6.2.1",
+        "ts-node": "^8.2.0",
+        "tslint": "^5.20.1",
+        "tslint-config-prettier": "^1.18.0",
+        "typescript": "^3.7.3",
+        "webpack": "^4.41.2",
+        "webpack-cli": "^3.3.10",
+        "webpack-dev-server": "^3.9.0"
+    },
+    "dependencies": {
+        "glslify-loader": "^2.0.0",
+        "raw-loader": "^4.0.0"
+    }
+}

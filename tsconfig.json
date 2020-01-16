@@ -1,0 +1,12 @@
+{
+    "compileOnSave": true,
+    "compilerOptions": {
+        "module": "es6",
+        "target": "es5",
+        "sourceMap": true,
+        // "outFile": "plinko.js",
+        "outDir": "./dist/",
+        "removeComments": true
+    },
+    "files": ["./src/index.ts"]
+}
