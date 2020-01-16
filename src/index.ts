@@ -1,6 +1,9 @@
 // import vertSource from 'raw-loader!glslify-loader!./res/myShader.vert';
 import { createShader } from './ShaderHelpers';
 
+// import temp from '../res/myShader.vert';
+// import txt from 'raw-loader!../res/myShader.vert';
+
 function main() {
     const canvas = document.querySelector('#webgl-canvas') as HTMLCanvasElement;
 
@@ -12,9 +15,9 @@ function main() {
         console.log(`Has WebGL2 version ${gl.VERSION}`);
     }
 
-    const vertSource = (require('raw-loader!glslify-loader!../res/myShader.vert') as any)
+    const vertSource = (require('!!raw-loader!glslify-loader!../res/myShader.vert') as any)
         .default;
-    const fragSource = (require('raw-loader!glslify-loader!../res/myShader.frag') as any)
+    const fragSource = (require('!!raw-loader!glslify-loader!../res/myShader.frag') as any)
         .default;
 
     console.log({ vertSource, fragSource });
