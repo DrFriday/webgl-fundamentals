@@ -1,9 +1,10 @@
 import { resize } from './CanvasHelpers';
+import { setGeometry } from './GeometrySetters';
 import { randomInt } from './MathHelpers';
-import { createProgram, createShader, setRectangle } from './ShaderHelpers';
-import { IRenderContext, setGeometry } from './WebGLHelpers';
+import { createProgram, createShader } from './ShaderHelpers';
+import { IRenderContext } from './WebGLHelpers';
 
-const translation = [0, 0];
+const translation = [100, 100];
 const width = 100;
 const height = 30;
 
@@ -102,25 +103,26 @@ function drawScene(gl: WebGL2RenderingContext, rc: IRenderContext): void {
     // Pass in the canvas resolution so we can convert from
     // pixels to clip space in the shader
     gl.uniform2f(
-        rc.uniformLocations['resolution'],
+        rc.uniformLocations.resolution,
         gl.canvas.width,
         gl.canvas.height
     );
 
     // Set a color
     gl.uniform4f(
-        rc.uniformLocations['color'],
+        rc.uniformLocations.color,
         Math.random(),
         Math.random(),
         Math.random(),
         1
     );
 
-    gl.uniform2fv(rc.uniformLocations['translation'], translation);
+    // Set the translation
+    gl.uniform2fv(rc.uniformLocations.translation, translation);
 
     // Update the position buffer with rectangle positions
     gl.bindBuffer(gl.ARRAY_BUFFER, rc.positionBuffer);
-    setRectangle(gl, translation[0], translation[1], width, height);
+    // setRectangle(gl, translation[0], translation[1], width, height);
 
     // // Ask WebGL to execute our GLSL program
     const primitiveType = gl.TRIANGLES;
