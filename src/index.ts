@@ -1,12 +1,11 @@
 import { resize } from './CanvasHelpers';
 import { setGeometry } from './GeometrySetters';
-import { randomInt } from './MathHelpers';
 import { createProgram, createShader } from './ShaderHelpers';
 import { IRenderContext } from './WebGLHelpers';
 
 const translation = [100, 100];
-const width = 100;
-const height = 30;
+const rotation = [0.71, 0.71];
+const scale = [1, 1];
 
 function main() {
     const canvas = document.querySelector('#webgl-canvas') as HTMLCanvasElement;
@@ -15,10 +14,14 @@ function main() {
 
     if (!gl) {
         console.error('No WebGL2 ☹'); // tslint:disable-line
+        return;
     } else {
         console.log(`Has WebGL2 version ${gl.VERSION}`); // tslint:disable-line
     }
 
+    // =====================================================
+    //  Creating the WebGL program
+    // =====================================================
     const vertSource = (require('../shaders/myShader.vert') as any).default;
     const fragSource = (require('../shaders/myShader.frag') as any).default;
 
@@ -27,20 +30,24 @@ function main() {
 
     const program = createProgram(gl, vertexShader, fragmentShader);
 
-    const positionAttributeLocation = gl.getAttribLocation(
-        program,
-        'a_position'
-    );
+    // =====================================================
+    //  Getting locations
+    // =====================================================
+    const positionLocation = gl.getAttribLocation(program, 'a_position');
 
-    const resolutionUniformLocation = gl.getUniformLocation(
-        program,
-        'u_resolution'
-    );
+    const resolutionLocation = gl.getUniformLocation(program, 'u_resolution');
 
     const colorLocation = gl.getUniformLocation(program, 'u_color');
 
     const translationLocation = gl.getUniformLocation(program, 'u_translation');
 
+    const rotationLocation = gl.getUniformLocation(program, 'u_rotation');
+
+    const scaleLocation = gl.getUniformLocation(program, 'u_scale');
+
+    // =====================================================
+    //  Setting position data
+    // =====================================================
     const positionBuffer = gl.createBuffer();
 
     // Bind it to ARRAY_BUFFER (think of it as ARRAY_BUFFER = positionBuffer)
@@ -52,7 +59,7 @@ function main() {
     // vertex array object
     const vao = gl.createVertexArray();
     gl.bindVertexArray(vao);
-    gl.enableVertexAttribArray(positionAttributeLocation);
+    gl.enableVertexAttribArray(positionLocation);
 
     const size = 2; // 2 components per iteration, will set z and w to default values
     const type = gl.FLOAT; // the data is 32bit floats
@@ -60,7 +67,7 @@ function main() {
     const stride = 0; // 0 = move forward size * sizeof(type) each iteration to get the next position
     const offset = 0; // start at the beginning of the buffer
     gl.vertexAttribPointer(
-        positionAttributeLocation,
+        positionLocation,
         size,
         type,
         normalize,
@@ -68,6 +75,14 @@ function main() {
         offset
     );
 
+    const angleInRadians = (25 * Math.PI) / 180;
+    // added '-' to match tutorial, not sure if I need it?
+    rotation[0] = -Math.sin(angleInRadians);
+    rotation[1] = Math.cos(angleInRadians);
+
+    // =====================================================
+    //  Rendering setup and actual rendering
+    // =====================================================
     resize(gl.canvas as HTMLCanvasElement);
 
     const renderObject: IRenderContext = {
@@ -77,7 +92,9 @@ function main() {
         program,
         uniformLocations: {
             color: colorLocation,
-            resolution: resolutionUniformLocation,
+            resolution: resolutionLocation,
+            rotation: rotationLocation,
+            scale: scaleLocation,
             translation: translationLocation
         },
         vao
@@ -87,7 +104,9 @@ function main() {
 }
 
 function drawScene(gl: WebGL2RenderingContext, rc: IRenderContext): void {
-    // Begin refactor
+    // =====================================================
+    //  Resetting canvas
+    // =====================================================
     gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
 
     // Clear the canvas
@@ -99,6 +118,10 @@ function drawScene(gl: WebGL2RenderingContext, rc: IRenderContext): void {
 
     // Bind the attribute/buffer set we want.
     gl.bindVertexArray(rc.vao);
+
+    // =====================================================
+    //  Setting globals for shader
+    // =====================================================
 
     // Pass in the canvas resolution so we can convert from
     // pixels to clip space in the shader
@@ -120,11 +143,19 @@ function drawScene(gl: WebGL2RenderingContext, rc: IRenderContext): void {
     // Set the translation
     gl.uniform2fv(rc.uniformLocations.translation, translation);
 
+    gl.uniform2fv(rc.uniformLocations.rotation, rotation);
+
+    gl.uniform2fv(rc.uniformLocations.scale, scale);
+
+    // =====================================================
+    //  Draw the things
+    // =====================================================
+
     // Update the position buffer with rectangle positions
     gl.bindBuffer(gl.ARRAY_BUFFER, rc.positionBuffer);
     // setRectangle(gl, translation[0], translation[1], width, height);
 
-    // // Ask WebGL to execute our GLSL program
+    // Draw the geometry. Set in setGeometry
     const primitiveType = gl.TRIANGLES;
     const first = 0;
     gl.drawArrays(primitiveType, first, rc.count);
