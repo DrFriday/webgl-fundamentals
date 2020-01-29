@@ -1,11 +1,13 @@
 import { resize } from './CanvasHelpers';
 import { setGeometry } from './GeometrySetters';
+import Mat3 from './Mat3';
 import { createProgram, createShader } from './ShaderHelpers';
 import { IRenderContext } from './WebGLHelpers';
 
-const translation = [100, 100];
-const rotation = [0.71, 0.71];
-const scale = [1, 1];
+const translation = [257, 150];
+const rotationInDegrees = -46;
+const rotationInRadians = (rotationInDegrees * Math.PI) / 180;
+const scale = [2.69, 1];
 
 function main() {
     const canvas = document.querySelector('#webgl-canvas') as HTMLCanvasElement;
@@ -39,11 +41,7 @@ function main() {
 
     const colorLocation = gl.getUniformLocation(program, 'u_color');
 
-    const translationLocation = gl.getUniformLocation(program, 'u_translation');
-
-    const rotationLocation = gl.getUniformLocation(program, 'u_rotation');
-
-    const scaleLocation = gl.getUniformLocation(program, 'u_scale');
+    const matrixLocation = gl.getUniformLocation(program, 'u_matrix');
 
     // =====================================================
     //  Setting position data
@@ -75,27 +73,19 @@ function main() {
         offset
     );
 
-    const angleInRadians = (25 * Math.PI) / 180;
-    // added '-' to match tutorial, not sure if I need it?
-    rotation[0] = -Math.sin(angleInRadians);
-    rotation[1] = Math.cos(angleInRadians);
-
     // =====================================================
     //  Rendering setup and actual rendering
     // =====================================================
     resize(gl.canvas as HTMLCanvasElement);
 
     const renderObject: IRenderContext = {
-        // attributeLocations: [positionAttributeLocation],
         count: numPositions / size,
         positionBuffer,
         program,
         uniformLocations: {
             color: colorLocation,
-            resolution: resolutionLocation,
-            rotation: rotationLocation,
-            scale: scaleLocation,
-            translation: translationLocation
+            matrix: matrixLocation,
+            resolution: resolutionLocation
         },
         vao
     };
@@ -140,12 +130,27 @@ function drawScene(gl: WebGL2RenderingContext, rc: IRenderContext): void {
         1
     );
 
-    // Set the translation
-    gl.uniform2fv(rc.uniformLocations.translation, translation);
+    // =====================================================
+    //  Matricies
+    // =====================================================
+    const translationMatrix = Mat3.translate(translation[0], translation[1]);
+    const rotationMatrix = Mat3.rotation(rotationInRadians);
+    const scaleMatrix = Mat3.scaling(scale[0], scale[1]);
+    const moveOriginMatrix = Mat3.translate(-50, -75);
 
-    gl.uniform2fv(rc.uniformLocations.rotation, rotation);
+    // Multiply the matrices.
+    // const matrix = Mat3.multiply(
+    //     Mat3.multiply(translationMatrix, rotationMatrix),
+    //     scaleMatrix
+    // );
 
-    gl.uniform2fv(rc.uniformLocations.scale, scale);
+    let matrix = Mat3.identity();
+    matrix = Mat3.multiply(matrix, translationMatrix);
+    matrix = Mat3.multiply(matrix, rotationMatrix);
+    matrix = Mat3.multiply(matrix, scaleMatrix);
+    matrix = Mat3.multiply(matrix, moveOriginMatrix);
+
+    gl.uniformMatrix3fv(rc.uniformLocations.matrix, false, matrix);
 
     // =====================================================
     //  Draw the things
@@ -153,7 +158,6 @@ function drawScene(gl: WebGL2RenderingContext, rc: IRenderContext): void {
 
     // Update the position buffer with rectangle positions
     gl.bindBuffer(gl.ARRAY_BUFFER, rc.positionBuffer);
-    // setRectangle(gl, translation[0], translation[1], width, height);
 
     // Draw the geometry. Set in setGeometry
     const primitiveType = gl.TRIANGLES;
