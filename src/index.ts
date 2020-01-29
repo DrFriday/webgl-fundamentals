@@ -4,10 +4,10 @@ import Mat3 from './Mat3';
 import { createProgram, createShader } from './ShaderHelpers';
 import { IRenderContext } from './WebGLHelpers';
 
-const translation = [257, 150];
-const rotationInDegrees = -46;
+const translation = [150, 100];
+const rotationInDegrees = 0;
 const rotationInRadians = (rotationInDegrees * Math.PI) / 180;
-const scale = [2.69, 1];
+const scale = [1, 1];
 
 function main() {
     const canvas = document.querySelector('#webgl-canvas') as HTMLCanvasElement;
@@ -36,8 +36,6 @@ function main() {
     //  Getting locations
     // =====================================================
     const positionLocation = gl.getAttribLocation(program, 'a_position');
-
-    const resolutionLocation = gl.getUniformLocation(program, 'u_resolution');
 
     const colorLocation = gl.getUniformLocation(program, 'u_color');
 
@@ -84,8 +82,7 @@ function main() {
         program,
         uniformLocations: {
             color: colorLocation,
-            matrix: matrixLocation,
-            resolution: resolutionLocation
+            matrix: matrixLocation
         },
         vao
     };
@@ -100,7 +97,7 @@ function drawScene(gl: WebGL2RenderingContext, rc: IRenderContext): void {
     gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
 
     // Clear the canvas
-    gl.clearColor(0, 0, 0, 0);
+    gl.clearColor(1, 0, 0, 0);
     gl.clear(gl.COLOR_BUFFER_BIT);
 
     // Tell it to use our program
@@ -112,14 +109,6 @@ function drawScene(gl: WebGL2RenderingContext, rc: IRenderContext): void {
     // =====================================================
     //  Setting globals for shader
     // =====================================================
-
-    // Pass in the canvas resolution so we can convert from
-    // pixels to clip space in the shader
-    gl.uniform2f(
-        rc.uniformLocations.resolution,
-        gl.canvas.width,
-        gl.canvas.height
-    );
 
     // Set a color
     gl.uniform4f(
@@ -133,18 +122,18 @@ function drawScene(gl: WebGL2RenderingContext, rc: IRenderContext): void {
     // =====================================================
     //  Matricies
     // =====================================================
-    const translationMatrix = Mat3.translate(translation[0], translation[1]);
+    const projectionMatrix = Mat3.projection(
+        (gl.canvas as any).clientWidth,
+        (gl.canvas as any).clientHeight
+    );
+    const translationMatrix = Mat3.translation(translation[0], translation[1]);
     const rotationMatrix = Mat3.rotation(rotationInRadians);
     const scaleMatrix = Mat3.scaling(scale[0], scale[1]);
-    const moveOriginMatrix = Mat3.translate(-50, -75);
-
-    // Multiply the matrices.
-    // const matrix = Mat3.multiply(
-    //     Mat3.multiply(translationMatrix, rotationMatrix),
-    //     scaleMatrix
-    // );
+    const moveOriginMatrix = Mat3.translation(-50, -75);
 
     let matrix = Mat3.identity();
+    // matrix = Mat3.multiply(projectionMatrix, translationMatrix);
+    matrix = Mat3.multiply(matrix, projectionMatrix);
     matrix = Mat3.multiply(matrix, translationMatrix);
     matrix = Mat3.multiply(matrix, rotationMatrix);
     matrix = Mat3.multiply(matrix, scaleMatrix);
