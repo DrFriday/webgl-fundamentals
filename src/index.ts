@@ -1,11 +1,11 @@
 import { resize } from './CanvasHelpers';
 import { setGeometry } from './GeometrySetters';
-import Mat3 from './Mat3';
+import Mat3 from './math/Mat3';
 import { createProgram, createShader } from './ShaderHelpers';
 import { IRenderContext } from './WebGLHelpers';
 
 const translation = [150, 100];
-const rotationInDegrees = 0;
+const rotationInDegrees = 28;
 const rotationInRadians = (rotationInDegrees * Math.PI) / 180;
 const scale = [1, 1];
 
@@ -121,24 +121,25 @@ function drawScene(gl: WebGL2RenderingContext, rc: IRenderContext): void {
 
     // =====================================================
     //  Matricies
+    // https://webgl2fundamentals.org/webgl/lessons/webgl-2d-matrices.html
     // =====================================================
-    const projectionMatrix = Mat3.projection(
+
+    // 1. Change screen to client width and height
+    let matrix = Mat3.projection(
         (gl.canvas as any).clientWidth,
         (gl.canvas as any).clientHeight
     );
-    const translationMatrix = Mat3.translation(translation[0], translation[1]);
-    const rotationMatrix = Mat3.rotation(rotationInRadians);
-    const scaleMatrix = Mat3.scaling(scale[0], scale[1]);
-    const moveOriginMatrix = Mat3.translation(-50, -75);
 
-    let matrix = Mat3.identity();
-    // matrix = Mat3.multiply(projectionMatrix, translationMatrix);
-    matrix = Mat3.multiply(matrix, projectionMatrix);
-    matrix = Mat3.multiply(matrix, translationMatrix);
-    matrix = Mat3.multiply(matrix, rotationMatrix);
-    matrix = Mat3.multiply(matrix, scaleMatrix);
-    matrix = Mat3.multiply(matrix, moveOriginMatrix);
+    // 2. Move grid to new point
+    matrix = Mat3.translate(matrix, translation[0], translation[1]);
 
+    // 3. Rotate the grid
+    matrix = Mat3.rotate(matrix, rotationInRadians);
+
+    // 4. Scale grid
+    matrix = Mat3.scale(matrix, scale[0], scale[1]);
+
+    // 5. Set the grid!
     gl.uniformMatrix3fv(rc.uniformLocations.matrix, false, matrix);
 
     // =====================================================

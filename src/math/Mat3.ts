@@ -1,18 +1,4 @@
 export default class Mat3 {
-    public static translate(tx: number, ty: number): number[] {
-        return [1, 0, 0, 0, 1, 0, tx, ty, 1];
-    }
-
-    public static rotation(angleInRadians: number): number[] {
-        const c = Math.cos(angleInRadians);
-        const s = Math.sin(angleInRadians);
-        return [c, -s, 0, s, c, 0, 0, 0, 1];
-    }
-
-    public static scaling(sx: number, sy: number): number[] {
-        return [sx, 0, 0, 0, sy, 0, 0, 0, 1];
-    }
-
     /**
      * Muliply two 3x3 matricies together.
      */
@@ -55,10 +41,37 @@ export default class Mat3 {
 
     public static projection(width: number, height: number): number[] {
         // Note: This matrix flips the Y axis so that 0 is at the top.
-        return [
-          2 / width, 0, 0,
-          0, -2 / height, 0,
-          -1, 1, 1,
-        ];
-      },
+        return [2 / width, 0, 0, 0, -2 / height, 0, -1, 1, 1];
+    }
+
+    public static translate(m: number[], tx: number, ty: number) {
+        return Mat3.multiply(m, Mat3.translation(tx, ty));
+    }
+
+    /**
+     * Rotates the matrix by some radians.
+     * @param m 3x3 Matrix
+     * @param angle Angle to rotate in radians
+     */
+    public static rotate(m: number[], angle: number) {
+        return Mat3.multiply(m, Mat3.rotation(angle));
+    }
+
+    public static scale(m: number[], sx: number, sy: number) {
+        return Mat3.multiply(m, Mat3.scaling(sx, sy));
+    }
+
+    private static translation(tx: number, ty: number): number[] {
+        return [1, 0, 0, 0, 1, 0, tx, ty, 1];
+    }
+
+    private static rotation(angleInRadians: number): number[] {
+        const c = Math.cos(angleInRadians);
+        const s = Math.sin(angleInRadians);
+        return [c, -s, 0, s, c, 0, 0, 0, 1];
+    }
+
+    private static scaling(sx: number, sy: number): number[] {
+        return [sx, 0, 0, 0, sy, 0, 0, 0, 1];
+    }
 }
