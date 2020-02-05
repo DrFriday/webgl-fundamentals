@@ -1,13 +1,14 @@
 import { resize } from './CanvasHelpers';
-import { setGeometry } from './GeometrySetters';
+import { set3dF, setGeometry } from './GeometrySetters';
 import Mat3 from './math/Mat3';
+import Mat4 from './math/Mat4';
 import { createProgram, createShader } from './ShaderHelpers';
 import { IRenderContext } from './WebGLHelpers';
 
-const translation = [150, 100];
-const rotationInDegrees = 28;
-const rotationInRadians = (rotationInDegrees * Math.PI) / 180;
-const scale = [1, 1];
+const translation = [45, 150, 0];
+const degreeToRadians = (angle: number) => (angle * Math.PI) / 180;
+const rotations = [32, 25, 328].map(degreeToRadians);
+const scale = [1.23, 1, 1];
 
 function main() {
     const canvas = document.querySelector('#webgl-canvas') as HTMLCanvasElement;
@@ -50,14 +51,14 @@ function main() {
     gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
 
     // Positions in pixels
-    const numPositions = setGeometry(gl);
+    const numPositions = set3dF(gl);
 
     // vertex array object
     const vao = gl.createVertexArray();
     gl.bindVertexArray(vao);
     gl.enableVertexAttribArray(positionLocation);
 
-    const size = 2; // 2 components per iteration, will set z and w to default values
+    const size = 3; // 2 components per iteration, will set z and w to default values
     const type = gl.FLOAT; // the data is 32bit floats
     const normalize = false; // don't normalize the data
     const stride = 0; // 0 = move forward size * sizeof(type) each iteration to get the next position
@@ -125,22 +126,31 @@ function drawScene(gl: WebGL2RenderingContext, rc: IRenderContext): void {
     // =====================================================
 
     // 1. Change screen to client width and height
-    let matrix = Mat3.projection(
+    let matrix = Mat4.projection(
         (gl.canvas as any).clientWidth,
-        (gl.canvas as any).clientHeight
+        (gl.canvas as any).clientHeight,
+        400
     );
 
     // 2. Move grid to new point
-    matrix = Mat3.translate(matrix, translation[0], translation[1]);
+    matrix = Mat4.translate(
+        matrix,
+        translation[0],
+        translation[1],
+        translation[2]
+    );
 
     // 3. Rotate the grid
-    matrix = Mat3.rotate(matrix, rotationInRadians);
+    // matrix = Mat4.rotate(matrix, rotationInRadians);
+    matrix = Mat4.xRotate(matrix, rotations[0]);
+    matrix = Mat4.yRotate(matrix, rotations[1]);
+    matrix = Mat4.zRotate(matrix, rotations[2]);
 
     // 4. Scale grid
-    matrix = Mat3.scale(matrix, scale[0], scale[1]);
+    matrix = Mat4.scale(matrix, scale[0], scale[1], scale[2]);
 
     // 5. Set the grid!
-    gl.uniformMatrix3fv(rc.uniformLocations.matrix, false, matrix);
+    gl.uniformMatrix4fv(rc.uniformLocations.matrix, false, matrix);
 
     // =====================================================
     //  Draw the things
