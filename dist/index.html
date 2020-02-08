@@ -22,6 +22,62 @@
     </head>
     <body>
         <canvas id="webgl-canvas" width="1000" height="1000"></canvas>
+        <div>
+            X Translation:
+            <input
+                type="range"
+                id="x-translation"
+                value="50"
+                min="0"
+                max="500"
+            />
+        </div>
+        <div>
+            Y Translation:
+            <input
+                type="range"
+                id="y-translation"
+                value="50"
+                min="0"
+                max="500"
+            />
+        </div>
+        <div>
+            Z Translation:
+            <input
+                type="range"
+                id="z-translation"
+                value="0"
+                min="0"
+                max="500"
+            />
+        </div>
+        <!-- Angle -->
+        <div>
+            X Angle:
+            <input type="range" id="x-angle" value="0" min="0" max="360" />
+        </div>
+        <div>
+            Y Angle:
+            <input type="range" id="y-angle" value="50" min="0" max="500" />
+        </div>
+        <div>
+            Z Angle:
+            <input type="range" id="z-angle" value="0" min="0" max="500" />
+        </div>
+        <!-- Scale -->
+        <div>
+            X scale:
+            <input type="range" id="x-scale" value="1" min="0" max="5" />
+        </div>
+        <div>
+            Y scale:
+            <input type="range" id="y-scale" value="1" min="0" max="5" />
+        </div>
+        <div>
+            Z scale:
+            <input type="range" id="z-scale" value="1" min="0" max="5" />
+        </div>
     </body>
     <script src="/webfund.dev.js"></script>
 </html>

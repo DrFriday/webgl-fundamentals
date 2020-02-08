@@ -9,6 +9,8 @@ const translation = [61, 150, 32];
 const degreeToRadians = (angle: number) => (angle * Math.PI) / 180;
 const rotations = [41, 10, 313].map(degreeToRadians);
 const scale = [1, 1, 1];
+let renderingContextData: IRenderContext;
+let globalGL2: WebGL2RenderingContext;
 
 function main() {
     const canvas = document.querySelector('#webgl-canvas') as HTMLCanvasElement;
@@ -112,7 +114,7 @@ function main() {
     // =====================================================
     resize(gl.canvas as HTMLCanvasElement);
 
-    const renderContextData: IRenderContext = {
+    renderingContextData = {
         count: numPositions / size,
         positionBuffer,
         program,
@@ -123,7 +125,78 @@ function main() {
         vao
     };
 
-    drawScene(gl, renderContextData);
+    globalGL2 = gl;
+
+    drawScene(globalGL2, renderingContextData);
+
+    // =====================================================
+    //  Attacht listeners to user input
+    // =====================================================
+
+    // =================
+    //  Translations
+    // =================
+
+    const updateTranslation = (index: number) => (ev: Event) => {
+        const newValue = (ev.target as HTMLInputElement).value;
+        translation[index] = parseInt(newValue, 10);
+        drawScene(globalGL2, renderingContextData);
+    };
+
+    document
+        .getElementById('x-translation')
+        .addEventListener('input', updateTranslation(0));
+
+    document
+        .getElementById('y-translation')
+        .addEventListener('input', updateTranslation(1));
+
+    document
+        .getElementById('z-translation')
+        .addEventListener('input', updateTranslation(2));
+
+    // =================
+    //  Angle
+    // =================
+
+    const updateAngle = (index: number) => (ev: Event) => {
+        const newValue = (ev.target as HTMLInputElement).value;
+        rotations[index] = degreeToRadians(parseInt(newValue, 10));
+        drawScene(globalGL2, renderingContextData);
+    };
+
+    document
+        .getElementById('x-angle')
+        .addEventListener('input', updateAngle(0));
+
+    document
+        .getElementById('y-angle')
+        .addEventListener('input', updateAngle(1));
+
+    document
+        .getElementById('z-angle')
+        .addEventListener('input', updateAngle(2));
+
+    // =================
+    //  Scale
+    // =================
+    const updateScale = (index: number) => (ev: Event) => {
+        const newValue = (ev.target as HTMLInputElement).value;
+        scale[index] = degreeToRadians(parseInt(newValue, 10));
+        drawScene(globalGL2, renderingContextData);
+    };
+
+    document
+        .getElementById('x-scale')
+        .addEventListener('input', updateScale(0));
+
+    document
+        .getElementById('y-scale')
+        .addEventListener('input', updateScale(1));
+
+    document
+        .getElementById('z-scale')
+        .addEventListener('input', updateScale(2));
 }
 
 function drawScene(gl: WebGL2RenderingContext, rc: IRenderContext): void {
