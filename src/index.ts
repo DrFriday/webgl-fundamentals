@@ -1,14 +1,14 @@
 import { resize } from './CanvasHelpers';
-import { set3dF, setGeometry } from './GeometrySetters';
-import Mat3 from './math/Mat3';
+import { setColors } from './ColorSetters';
+import { set3dF } from './GeometrySetters';
 import Mat4 from './math/Mat4';
 import { createProgram, createShader } from './ShaderHelpers';
 import { IRenderContext } from './WebGLHelpers';
 
-const translation = [45, 150, 0];
+const translation = [61, 150, 32];
 const degreeToRadians = (angle: number) => (angle * Math.PI) / 180;
-const rotations = [32, 25, 328].map(degreeToRadians);
-const scale = [1.23, 1, 1];
+const rotations = [41, 10, 313].map(degreeToRadians);
+const scale = [1, 1, 1];
 
 function main() {
     const canvas = document.querySelector('#webgl-canvas') as HTMLCanvasElement;
@@ -38,9 +38,14 @@ function main() {
     // =====================================================
     const positionLocation = gl.getAttribLocation(program, 'a_position');
 
-    const colorLocation = gl.getUniformLocation(program, 'u_color');
+    const colorLocation = gl.getAttribLocation(program, 'a_color');
 
     const matrixLocation = gl.getUniformLocation(program, 'u_matrix');
+
+    // =====================================================
+    //  Setup for position and color
+    // =====================================================
+    const size = 3; // 3 components per iteration
 
     // =====================================================
     //  Setting position data
@@ -58,37 +63,67 @@ function main() {
     gl.bindVertexArray(vao);
     gl.enableVertexAttribArray(positionLocation);
 
-    const size = 3; // 2 components per iteration, will set z and w to default values
-    const type = gl.FLOAT; // the data is 32bit floats
-    const normalize = false; // don't normalize the data
-    const stride = 0; // 0 = move forward size * sizeof(type) each iteration to get the next position
-    const offset = 0; // start at the beginning of the buffer
-    gl.vertexAttribPointer(
-        positionLocation,
-        size,
-        type,
-        normalize,
-        stride,
-        offset
-    );
+    {
+        const type = gl.FLOAT; // the data is 32bit floats
+        const normalize = false; // don't normalize the data
+        const stride = 0; // 0 = move forward size * sizeof(type) each iteration to get the next position
+        const offset = 0; // start at the beginning of the buffer
+        gl.vertexAttribPointer(
+            positionLocation,
+            size,
+            type,
+            normalize,
+            stride,
+            offset
+        );
+    }
+
+    // =====================================================
+    //  Setting color data
+    // =====================================================
+
+    // create the color buffer, make it the current ARRAY_BUFFER
+    // and copy in the color values
+    const colorBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
+    setColors(gl);
+
+    // Turn on the attribute
+    gl.enableVertexAttribArray(colorLocation);
+
+    {
+        // Tell the attribute how to get data out of colorBuffer (ARRAY_BUFFER)
+        const type = gl.UNSIGNED_BYTE; // the data is 8bit unsigned bytes
+        const normalize = true; // convert from 0-255 to 0.0-1.0
+        const stride = 0; // 0 = move forward size * sizeof(type) each iteration to get the next color
+        const offset = 0; // start at the beginning of the buffer
+        gl.vertexAttribPointer(
+            colorLocation,
+            size,
+            type,
+            normalize,
+            stride,
+            offset
+        );
+    }
 
     // =====================================================
     //  Rendering setup and actual rendering
     // =====================================================
     resize(gl.canvas as HTMLCanvasElement);
 
-    const renderObject: IRenderContext = {
+    const renderContextData: IRenderContext = {
         count: numPositions / size,
         positionBuffer,
         program,
         uniformLocations: {
-            color: colorLocation,
+            // color: colorLocation,
             matrix: matrixLocation
         },
         vao
     };
 
-    drawScene(gl, renderObject);
+    drawScene(gl, renderContextData);
 }
 
 function drawScene(gl: WebGL2RenderingContext, rc: IRenderContext): void {
@@ -99,7 +134,8 @@ function drawScene(gl: WebGL2RenderingContext, rc: IRenderContext): void {
 
     // Clear the canvas
     gl.clearColor(1, 0, 0, 0);
-    gl.clear(gl.COLOR_BUFFER_BIT);
+    // Clear the canvas AND the depth buffer.
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT); // tslint:disable-line
 
     // Tell it to use our program
     gl.useProgram(rc.program);
@@ -111,14 +147,14 @@ function drawScene(gl: WebGL2RenderingContext, rc: IRenderContext): void {
     //  Setting globals for shader
     // =====================================================
 
-    // Set a color
-    gl.uniform4f(
-        rc.uniformLocations.color,
-        Math.random(),
-        Math.random(),
-        Math.random(),
-        1
-    );
+    // // Set a color
+    // gl.uniform4f(
+    //     rc.uniformLocations.color,
+    //     Math.random(),
+    //     Math.random(),
+    //     Math.random(),
+    //     1
+    // );
 
     // =====================================================
     //  Matricies
@@ -126,11 +162,13 @@ function drawScene(gl: WebGL2RenderingContext, rc: IRenderContext): void {
     // =====================================================
 
     // 1. Change screen to client width and height
-    let matrix = Mat4.projection(
-        (gl.canvas as any).clientWidth,
-        (gl.canvas as any).clientHeight,
-        400
-    );
+    const left = 0;
+    const right = (gl.canvas as any).clientWidth;
+    const bottom = (gl.canvas as any).clientHeight;
+    const top = 0;
+    const near = 400;
+    const far = -400;
+    let matrix = Mat4.orthographic(left, right, bottom, top, near, far);
 
     // 2. Move grid to new point
     matrix = Mat4.translate(
@@ -155,6 +193,13 @@ function drawScene(gl: WebGL2RenderingContext, rc: IRenderContext): void {
     // =====================================================
     //  Draw the things
     // =====================================================
+
+    // "culling" back facing triangles.
+    // "Culling" in this case is a fancy word for "not drawing".
+    gl.enable(gl.CULL_FACE);
+
+    // Z-Buffer
+    gl.enable(gl.DEPTH_TEST);
 
     // Update the position buffer with rectangle positions
     gl.bindBuffer(gl.ARRAY_BUFFER, rc.positionBuffer);

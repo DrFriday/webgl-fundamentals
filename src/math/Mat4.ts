@@ -89,6 +89,12 @@ export default class Mat4 {
         return [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
     }
 
+    /**
+     * DEPRECEATED - depth
+     * @param width Width
+     * @param height Height
+     * @param depth Depth
+     */
     public static projection(
         width: number,
         height: number,
@@ -111,6 +117,35 @@ export default class Mat4 {
             -1,
             1,
             0,
+            1
+        ];
+    }
+
+    public static orthographic(
+        left: number,
+        right: number,
+        bottom: number,
+        top: number,
+        near: number,
+        far: number
+    ) {
+        return [
+            2 / (right - left),
+            0,
+            0,
+            0,
+            0,
+            2 / (top - bottom),
+            0,
+            0,
+            0,
+            0,
+            2 / (near - far),
+            0,
+
+            (left + right) / (left - right),
+            (bottom + top) / (bottom - top),
+            (near + far) / (near - far),
             1
         ];
     }
