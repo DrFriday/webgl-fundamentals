@@ -176,27 +176,6 @@ function main() {
     document
         .getElementById('z-angle')
         .addEventListener('input', updateAngle(2));
-
-    // =================
-    //  Scale
-    // =================
-    const updateScale = (index: number) => (ev: Event) => {
-        const newValue = (ev.target as HTMLInputElement).value;
-        scale[index] = degreeToRadians(parseInt(newValue, 10));
-        drawScene(globalGL2, renderingContextData);
-    };
-
-    document
-        .getElementById('x-scale')
-        .addEventListener('input', updateScale(0));
-
-    document
-        .getElementById('y-scale')
-        .addEventListener('input', updateScale(1));
-
-    document
-        .getElementById('z-scale')
-        .addEventListener('input', updateScale(2));
 }
 
 function drawScene(gl: WebGL2RenderingContext, rc: IRenderContext): void {
