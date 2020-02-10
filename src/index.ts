@@ -5,10 +5,12 @@ import Mat4 from './math/Mat4';
 import { createProgram, createShader } from './ShaderHelpers';
 import { IRenderContext } from './WebGLHelpers';
 
-const translation = [61, 150, 32];
+const translation = [-4, -4, -481];
 const degreeToRadians = (angle: number) => (angle * Math.PI) / 180;
-const rotations = [41, 10, 313].map(degreeToRadians);
+const rotations = [190, 40, 30].map(degreeToRadians);
 const scale = [1, 1, 1];
+let fieldOfViewRadians = degreeToRadians(75);
+
 let renderingContextData: IRenderContext;
 let globalGL2: WebGL2RenderingContext;
 
@@ -176,6 +178,12 @@ function main() {
     document
         .getElementById('z-angle')
         .addEventListener('input', updateAngle(2));
+
+    document.getElementById('fov').addEventListener('input', (ev: Event) => {
+        const newValue = (ev.target as HTMLInputElement).value;
+        fieldOfViewRadians = degreeToRadians(parseInt(newValue, 10));
+        drawScene(globalGL2, renderingContextData);
+    });
 }
 
 function drawScene(gl: WebGL2RenderingContext, rc: IRenderContext): void {
@@ -214,13 +222,19 @@ function drawScene(gl: WebGL2RenderingContext, rc: IRenderContext): void {
     // =====================================================
 
     // 1. Change screen to client width and height
-    const left = 0;
-    const right = (gl.canvas as any).clientWidth;
-    const bottom = (gl.canvas as any).clientHeight;
-    const top = 0;
-    const near = 400;
-    const far = -400;
-    let matrix = Mat4.orthographic(left, right, bottom, top, near, far);
+    // const left = 0;
+    // const right = (gl.canvas as any).clientWidth;
+    // const bottom = (gl.canvas as any).clientHeight;
+    // const top = 0;
+    // const near = 400;
+    // const far = -400;
+    // let matrix = Mat4.orthographic(left, right, bottom, top, near, far);
+
+    const aspect =
+        (gl.canvas as any).clientWidth / (gl.canvas as any).clientHeight;
+    const zNear = 1;
+    const zFar = 2000;
+    let matrix = Mat4.perspective(fieldOfViewRadians, aspect, zNear, zFar);
 
     // 2. Move grid to new point
     matrix = Mat4.translate(
