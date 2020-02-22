@@ -3,3 +3,8 @@ out
 
 oldassets
 .vscode/
+
+.cache
+
+yarn-error.log
+dist/

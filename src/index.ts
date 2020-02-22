@@ -1,3 +1,5 @@
+import fragSource from '../shaders/myShader.frag';
+import vertSource from '../shaders/myShader.vert';
 import { resize } from './CanvasHelpers';
 import { setColors } from './ColorSetters';
 import { set3dF } from './GeometrySetters';
@@ -29,9 +31,6 @@ function main() {
     // =====================================================
     //  Creating the WebGL program
     // =====================================================
-    const vertSource = (require('../shaders/myShader.vert') as any).default;
-    const fragSource = (require('../shaders/myShader.frag') as any).default;
-
     const vertexShader = createShader(gl, gl.VERTEX_SHADER, vertSource);
     const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragSource);
 
